@@ -2,9 +2,9 @@ import User from '../model/user.js';
 import bcrypt from 'bcryptjs'; 
 
 const createUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!name || !email || !password) {
+  if ( !email || !password) {
     return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
   }
 
@@ -16,7 +16,7 @@ const createUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({ email, password: hashedPassword });
     res.status(201).json(user);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar usuário', details: error.message });
@@ -48,7 +48,7 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, email, password } = req.body;
+  const { email, password } = req.body;
 
   try {
     const user = await User.findByPk(id);
@@ -56,7 +56,7 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: 'Usuário não encontrado' });
     }
 
-    const updatedData = { name, email };
+    const updatedData = { email };
     if (password) {
       updatedData.password = await bcrypt.hash(password, 10);
     }

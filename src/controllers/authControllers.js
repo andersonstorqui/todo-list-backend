@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!name || !email || !password) {
+  if (!email || !password) {
     return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
   }
 
@@ -17,9 +17,10 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({ email, password: hashedPassword });
     res.status(201).json({ message: 'Usuário registrado com sucesso', user });
   } catch (error) {
+    console.error('Erro ao registrar usuário:', error.message);
     res.status(500).json({ error: 'Erro ao registrar usuário', details: error.message });
   }
 };
@@ -42,10 +43,15 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Email ou senha incorretos' });
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { id: user.id, email: user.email }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '1h' }
+    );
 
     res.status(200).json({ token });
   } catch (error) {
+    console.error('Erro ao fazer login:', error.message);
     res.status(500).json({ error: 'Erro ao fazer login', details: error.message });
   }
 };
